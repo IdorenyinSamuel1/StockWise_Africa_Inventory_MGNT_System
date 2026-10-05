@@ -4,7 +4,8 @@ import {
   getAllProducts, 
   getProductById, 
   updateProduct, 
-  deleteProduct 
+  deleteProduct,
+  getLowStockAlerts 
 } from "../controllers/productController.js";
 import { protect, authorize } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
@@ -23,6 +24,8 @@ router.use(protect);
 router.route("/")
   .post(authorize("Admin", "Manager"), productMediaFields, createProduct)
   .get(authorize("Admin", "Manager", "Staff"), getAllProducts);
+
+router.get("/alerts/low-stock", authorize("Admin", "Manager", "Staff"), getLowStockAlerts);
 
 router.route("/:id")
   .get(authorize("Admin", "Manager", "Staff"), getProductById)

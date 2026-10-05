@@ -1,13 +1,14 @@
 import Product from "../models/productModel.js";
-import { uploadToCloudinary } from "../config/cloudinary.js";
+import { uploadToCloudinary } from "../config/cloudinary.js"; 
 import mongoose from "mongoose";
 
-//  Private (Admin, Manager) create a new product with multiple images and a video
+//   POST /api/products
+// OnlyAdmin, Manager
 export const createProduct = async (req, res) => {
   try {
     const { name, sku, description, price, quantity, reorderLevel } = req.body;
 
-    //  Mandatory input validation
+    // Mandatory input validation
     if (!name || !sku || !price || !quantity) {
       return res.status(400).json({ success: false, message: "Please provide all required product fields" });
     }
@@ -36,7 +37,7 @@ export const createProduct = async (req, res) => {
       videoUrl = cloudResult.secure_url;
     }
 
-    //  Save Product Record to MongoDB
+    // Save Product Record to MongoDB
     const product = await Product.create({
       name,
       sku,
@@ -62,7 +63,8 @@ export const createProduct = async (req, res) => {
   }
 };
 
-//  Private (Admin, Manager, Staff) Get all products (Includes low-stock alert reporting flags)
+//   GET /api/products
+// OnlyAdmin, Manager, Staff
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
@@ -79,7 +81,8 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
-//  Private (Admin, Manager, Staff)
+//   GET /api/products/:id
+// OnlyAdmin, Manager, Staff
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -99,7 +102,9 @@ export const getProductById = async (req, res) => {
   }
 };
 
-//  Private (Admin, Manager)
+
+//   PATCH /api/products/:id
+//Only Admin, Manager
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -131,7 +136,8 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-//  Admin privilege only: Delete a product from the inventory database
+//   DELETE /api/products/:id
+//   Only Admin
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -148,5 +154,31 @@ export const deleteProduct = async (req, res) => {
     res.status(200).json({ success: true, message: "Product dropped from inventory database successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server product removal error", error: error.message });
+  }
+};
+
+// GET /api/products/alerts/low-stock
+//  Only Admin, Manager, Staff
+export const getLowStockAlerts = async (req, res) => {
+  try {
+    // Queries MongoDB: Filter products where quantity is less than or equal to reorderLevel
+    const lowStockProducts = await Product.find({
+      quantity: { $lte: "$reorderLevel" }
+    });
+
+    res.status(200).json({
+      success: true,
+      count: lowStockProducts.length,
+      message: lowStockProducts.length === 0 
+        ? "All products are well stocked!" 
+        : `Found ${lowStockProducts.length} items requiring urgent replenishment.`,
+      data: lowStockProducts
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve low stock alerts",
+      error: error.message
+    });
   }
 };
