@@ -162,9 +162,12 @@ export const deleteProduct = async (req, res) => {
 export const getLowStockAlerts = async (req, res) => {
   try {
     // Queries MongoDB: Filter products where quantity is less than or equal to reorderLevel
+    // const lowStockProducts = await Product.find({
+    //   quantity: { $lte: "$reorderLevel" }
+    // });
     const lowStockProducts = await Product.find({
-      quantity: { $lte: "$reorderLevel" }
-    });
+  $expr: { $lt: ["$quantity", "$reorderLevel"] }
+   });
 
     res.status(200).json({
       success: true,
