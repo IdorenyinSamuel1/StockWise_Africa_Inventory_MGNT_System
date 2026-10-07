@@ -6,6 +6,7 @@ import authRoutes from "./src/routes/authRoutes.js";
 import productRoutes from "./src/routes/productRoutes.js";
 import transactionRoutes from "./src/routes/transactionRoutes.js";
 import salesRoutes from "./src/routes/salesRoutes.js";
+import supplierRoutes from "./src/routes/supplierRoutes.js";
 
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/sales", salesRoutes);
+app.use("/api/suppliers", supplierRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "StockWise Africa API Engine running successfully" });
